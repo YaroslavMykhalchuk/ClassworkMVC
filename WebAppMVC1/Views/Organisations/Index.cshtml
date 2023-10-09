@@ -1,29 +1,50 @@
-﻿@model IEnumerable<DemoClients.Organisation>
+﻿@model OrganisationIndexViewModel;
 
 @{
     ViewData["Title"] = "Index";
     bool isOdd = false;
+    var mode = ViewData["Mode"] as string;
+    var sl = Html.GetEnumSelectList<DirectionSearch>();
+    //var sl = new List<SelectListItem>();
+    //sl.Add(new SelectListItem { Text = "startWith" });
+    //sl.Add(new SelectListItem { Text = "contains" });
+    //sl.Add(new SelectListItem { Text = "endWith" });
 }
 
 <h1>Index</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
+    <form asp-controller="Organisations" asp-action="Index" method="get">
+        <p>
+            @*Напрямок пошуку: @Html.DropDownList("direction", sl);*@
+            Напрямок пошуку: @Html.DropDownListFor(f=>f.DirectionSearch, sl);
+            Поле пошуку: @Html.DropDownListFor(model => model.FieldName, new SelectList(Model.AvailableFields ?? new List<string>()))
+            Title: <input type="text" name="filter" value="@ViewData["Filter"]"/>
+            <select name="mode">
+                <option value="startWith" selected="@(mode == "startWith")">StartWith</option>
+                <option value="contains" selected="@(mode == "contains")">Contains</option>
+                <option value="endWith" selected="@(mode == "endWith")">EndWith</option>
+            </select>
+            <input type="submit" value="Filter" />
+        </p>
+    </form>
+
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model.Organisations.First().Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.FullName)
+                @Html.DisplayNameFor(model => model.Organisations.First().FullName)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Organisations) {
         <tr style="background-color: @(isOdd ? "lightblue" : "wheat")">
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

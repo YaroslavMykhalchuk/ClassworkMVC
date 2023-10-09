@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DemoClients;
 using WebAppMVC1.Data;
+using WebAppMVC1.Models;
 
 namespace WebAppMVC1.Controllers
 {
@@ -20,31 +21,118 @@ namespace WebAppMVC1.Controllers
         }
 
         // GET: Organisations
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? filter, DirectionSearch directionSearch, string fieldName = "Name")
         {
-            return _context.Organisations != null ?
-                        View(await _context.Organisations.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.Organisations'  is null.");
+            if (this._context != null)
+            {
+                var query = _context.Organisations.AsQueryable();
+
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch (directionSearch)
+                    {
+                        case DirectionSearch.startWith:
+                            query = query.Where(o => EF.Property<string>(o, fieldName).StartsWith(filter));
+                            break;
+
+                        case DirectionSearch.endWith:
+                            query = query.Where(o => EF.Property<string>(o, fieldName).EndsWith(filter));
+                            break;
+
+                        case DirectionSearch.contains:
+                            query = query.Where(o => EF.Property<string>(o, fieldName).Contains(filter));
+                            break;
+
+                        default:
+                            query = query.Where(o => EF.Property<string>(o, fieldName).StartsWith(filter));
+                            break;
+                    }
+                }
+
+                var model = new OrganisationIndexViewModel
+                {
+                    Filter = filter,
+                    DirectionSearch = directionSearch,
+                    FieldName = fieldName,
+                    AvailableFields = typeof(Organisation).GetProperties()
+                        .Where(property => property.PropertyType == typeof(string))
+                        .Select(property => property.Name)
+                        .ToList()
+                };
+
+                model.Organisations = await query.ToListAsync();
+                return View(model);
+            }
+            return Problem("Entity set 'Organizations' is null");
         }
+
+        //// GET: Organisations
+        //public async Task<IActionResult> Index(string? filter, string? mode)
+        //{
+        //    ViewData["Filter"] = filter;
+        //    ViewData["Mode"] = mode;
+        //    if (_context.Organisations != null)
+        //    {
+        //        var query = _context.Organisations.AsQueryable();
+        //        if (filter != null)
+        //        {
+        //            switch (mode)
+        //            {
+        //                case "startWith":
+        //                    {
+        //                        query = query.Where(s => s.Name.StartsWith(filter));
+        //                    }
+        //                    break;
+        //                case "contains":
+        //                    {
+        //                        query = query.Where(s => s.Name.Contains(filter));
+        //                    }
+        //                    break;
+        //                case "endWith":
+        //                    {
+        //                        query = query.Where(s => s.Name.EndsWith(filter));
+        //                    }
+        //                    break;
+        //                default:
+        //                    {
+        //                        query = query.Where(s => s.Name.StartsWith(filter));
+        //                    }
+        //                    break;
+        //            }
+        //        }
+        //        var organisations = await query.ToListAsync();
+        //        var view = View(organisations);
+        //        return view;
+        //    }
+        //    return Problem("Entity set 'ApplicationDbContext.Organisations'  is null.");
+        //}
 
         // GET: Organisations/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Organisations == null)
+            if (id == null)
             {
                 return NotFound();
             }
 
-            var organisation = await _context.Organisations
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var organisation = await _context.Organisations.FindAsync(id);
+            var usersInOrganization = await _context.OrganisationUsers
+                .Where(u => u.OrganisationId == id)
+                .ToListAsync();
+
             if (organisation == null)
             {
                 return NotFound();
             }
 
-            return View(organisation);
-        }
+            var viewModel = new OrganisationDetailsViewModel
+            {
+                Organisation = organisation,
+                Users = usersInOrganization
+            };
 
+            return View(viewModel);
+        }
         // GET: Organisations/Create
         public IActionResult Create()
         {

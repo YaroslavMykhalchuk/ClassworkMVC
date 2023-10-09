@@ -1,0 +1,51 @@
+﻿@model IEnumerable<DemoClients.OrganisationUser>
+
+@{
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<a href="" id="super-edit">Super Edit</a>
+<a href="" id="super-details">Super Details</a>
+<a href="" id="super-delete">Super Delete</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Organisation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AccessLevel)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr user-id="@item.Id">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Organisation.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AccessLevel)
+                </td>
+                <td data-user-id="@item.Id">
+                    <a asp-controller="OrganisationUsers" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-controller="OrganisationUsers" asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-controller="OrganisationUsers" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

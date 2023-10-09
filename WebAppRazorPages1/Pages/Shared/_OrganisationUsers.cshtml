@@ -1,0 +1,58 @@
+﻿@using DemoClients
+@model IEnumerable<OrganisationUser>
+@{
+    Console.WriteLine(ViewData["OrganisationId"].ToString());
+    int organisationId = (int)ViewData["OrganisationId"];
+}
+<p>
+    <a asp-page="EditUser" asp-route-organisationId="@organisationId">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Organisation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Code)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AccessLevel)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr user-id="@item.Id">
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Organisation.FullName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.AccessLevel)
+                </td>
+                <td data-user-id="@item.Id">
+                    <a asp-page="EditUser" asp-route-id="@item.Id" asp-route-organisationId="@item.OrganisationId" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit User">
+                        <img src="/icons/edit.png" class="icon" alt="Edit Icon"/>
+                    </a> |
+                    <a asp-page="OrganisationUsers/Details" asp-route-id="@item.Id" asp-route-organisationId="@item.OrganisationId" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Details User">
+                        <img src="/icons/details.png" class="icon" alt="Details Icon"/>
+                    </a> |
+                    <a asp-page="OrganisationUsers/Delete" asp-route-id="@item.Id" asp-route-organisationId="@item.OrganisationId" class="text-decoration-none" data-bs-toggle="tooltip" data-bs-placement="top" title="Delete User">
+                        <img src="/icons/delete.png" class="icon" alt="Delete Icon"/>
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
